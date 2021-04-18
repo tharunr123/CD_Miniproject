@@ -60,8 +60,8 @@ extern int yydebug;
     T_eqeq = 270,
     T_pl = 271,
     S_min = 272,
-    S_mul = 273,
-    S_add = 274,
+    S_add = 273,
+    S_mul = 274,
     S_div = 275,
     T_min = 276,
     T_mul = 277,
@@ -73,15 +73,15 @@ extern int yydebug;
     T_not = 283,
     T_eq = 284,
     WHILE = 285,
-    DO = 286,
-    INT = 287,
-    CHAR = 288,
-    FLOAT = 289,
-    VOID = 290,
-    H = 291,
-    MAINTOK = 292,
-    INCLUDE = 293,
-    BREAK = 294,
+    INT = 286,
+    CHAR = 287,
+    FLOAT = 288,
+    VOID = 289,
+    H = 290,
+    MAINTOK = 291,
+    INCLUDE = 292,
+    BREAK = 293,
+    DO = 294,
     CONTINUE = 295,
     IF = 296,
     ELSE = 297,
@@ -111,8 +111,8 @@ extern int yydebug;
 #define T_eqeq 270
 #define T_pl 271
 #define S_min 272
-#define S_mul 273
-#define S_add 274
+#define S_add 273
+#define S_mul 274
 #define S_div 275
 #define T_min 276
 #define T_mul 277
@@ -124,15 +124,15 @@ extern int yydebug;
 #define T_not 283
 #define T_eq 284
 #define WHILE 285
-#define DO 286
-#define INT 287
-#define CHAR 288
-#define FLOAT 289
-#define VOID 290
-#define H 291
-#define MAINTOK 292
-#define INCLUDE 293
-#define BREAK 294
+#define INT 286
+#define CHAR 287
+#define FLOAT 288
+#define VOID 289
+#define H 290
+#define MAINTOK 291
+#define INCLUDE 292
+#define BREAK 293
+#define DO 294
 #define CONTINUE 295
 #define IF 296
 #define ELSE 297
