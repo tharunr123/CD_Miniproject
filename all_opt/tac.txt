@@ -1,0 +1,27 @@
+a = 1
+b = 40
+t00 = b * b
+c = t00
+i = 0
+d = 0
+n = 10
+L1 :
+t01 = a + 1
+a = t01
+t02 = a * a
+a = t02
+t03 = a < n
+t04 = not t03
+if t04 goto L2
+goto L1
+L2 :
+t15 = not 0
+if t15 goto L3
+t25 = a + b
+a = t25
+goto L4
+L3 : 
+t27 = a + b
+c = t27
+L4 : 
+

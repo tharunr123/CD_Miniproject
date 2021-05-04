@@ -26,7 +26,6 @@ int {  yylval = strdup(yytext); return INT;}
 float { yylval = strdup(yytext); return FLOAT;}
 char { yylval = strdup(yytext); return CHAR;}
 "main()" {  return MAINTOK;}
-for {  return FOR;}
 while {  return WHILE;}
 do { return DO; }
 return { return RETURN;}

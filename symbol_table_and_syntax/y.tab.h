@@ -85,13 +85,12 @@ extern int yydebug;
     ELSE = 295,
     COUT = 296,
     STRING = 297,
-    FOR = 298,
-    DO = 299,
-    OB = 300,
-    CB = 301,
-    OBR = 302,
-    CBR = 303,
-    ENDL = 304
+    DO = 298,
+    OB = 299,
+    CB = 300,
+    OBR = 301,
+    CBR = 302,
+    ENDL = 303
   };
 #endif
 /* Tokens.  */
@@ -135,13 +134,12 @@ extern int yydebug;
 #define ELSE 295
 #define COUT 296
 #define STRING 297
-#define FOR 298
-#define DO 299
-#define OB 300
-#define CB 301
-#define OBR 302
-#define CBR 303
-#define ENDL 304
+#define DO 298
+#define OB 299
+#define CB 300
+#define OBR 301
+#define CBR 302
+#define ENDL 303
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

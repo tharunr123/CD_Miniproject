@@ -16,7 +16,7 @@ extern int yylineno;
 %}
 
 %define parse.error verbose
-%token ID NUM T_lt T_gt COMMA STRC TERMINATOR RETURN FLT T_lteq T_gteq T_neq T_eqeq T_pl S_min S_add S_mul S_div T_min T_mul T_div T_and T_or T_incr T_decr T_not T_eq WHILE INT CHAR FLOAT VOID H MAINTOK INCLUDE BREAK DO CONTINUE IF ELSE COUT STRING FOR OB CB OBR CBR ENDL
+%token ID NUM T_lt T_gt COMMA STRC TERMINATOR RETURN FLT T_lteq T_gteq T_neq T_eqeq T_pl S_min S_add S_mul S_div T_min T_mul T_div T_and T_or T_incr T_decr T_not T_eq WHILE INT CHAR FLOAT VOID H MAINTOK INCLUDE BREAK DO CONTINUE IF ELSE COUT STRING OB CB OBR CBR ENDL
 
 %right T_eq
 %left T_or
@@ -33,7 +33,7 @@ extern int yylineno;
 %%
 S: START {
         printf("Successful parsing.\n");
-        exit(0);
+        //exit(0);
       }
       | error {
          yyerrok;
@@ -60,7 +60,6 @@ BODY
       }
       ;
 
-// extensively responsible for printing the nodes, and also adding the nodes, loop and statement, of similar scope together, in a binary tree fashion.
 C
       : C statement TERMINATOR
       | C LOOPS
@@ -80,10 +79,9 @@ ElseBody:
       |%empty
       ;
 LOOPS
-      : DO{ codegen_while1(); } LOOPBODY WHILE  OB COND CB {codegen_while2();} TERMINATOR  {codegen_while3();} 
-      
-      | FOR OB ASSIGN_EXPR TERMINATOR {lab1_for();} COND TERMINATOR {lab2_for();} statement {lab3_for();} CB LOOPBODY {lab4_for();}
+      : DO{ codegen_while1(); } LOOPBODY WHILE  OB COND CB {codegen_while2();} TERMINATOR  {codegen_while3(); } 
       ;
+     
 
 LOOPBODY
 	  : OBR C CBR {}
@@ -159,24 +157,6 @@ ARITH_EXPR
       }
       ;
 
-/* ADDSUB
-      : TERM {$$=$1;}
-      | ARITH_EXPR T_pl TERM { push($2); $$= addToTree((char *) $2, $1, $3, NULL, 0); codegen();}
-      | ARITH_EXPR T_min TERM {push($2); $$= addToTree((char *) $2, $1, $3, NULL, 0); codegen();}
-      ;
-
-TERM
-	  : FACTOR {$$=$1;}
-      | TERM T_mul FACTOR { push($2); $$= addToTree((char *) $2, $1, $3, NULL, 0); codegen();}
-      | TERM T_div FACTOR { push($2); $$= addToTree((char *) $2, $1, $3, NULL, 0); codegen();}
-      ;
-
-FACTOR
-	  : LIT {$$=$1;}
-	  | '(' ARITH_EXPR ')' {$$ = $2;}
-  	  ; */
-
-
 TERNARY_EXPR
       : OB COND CB '?' statement ':' statement
       ;
@@ -186,6 +166,10 @@ PRINT
       : COUT T_lt T_lt STRING
       | COUT T_lt T_lt STRING T_lt T_lt ENDL
       | COUT T_lt T_lt ENDL
+      | COUT T_lt T_lt ARITH_EXPR T_lt T_lt ENDL
+      | COUT T_lt T_lt ARITH_EXPR
+      | COUT T_lt T_lt ENDL
+
       ;
 LIT
       : ID {
@@ -258,6 +242,16 @@ int label[25];
 char i_[3]="00";
 char temp[2]="t";
 
+typedef struct quadruples
+  	{
+  	  char *op;
+  	  char *arg1;
+  	  char *arg2;
+  	  char *res;
+  	}quad;
+  	int quadindex = 0;			//current index of Q to store the quadruple in.
+	quad Q[100];
+
 void push(char* val){
   strcpy(st[top++], val);
 }
@@ -276,23 +270,15 @@ void codegen_bool()
 	strcpy(temp,"t");
 	strcat(temp,i_);
 	printf("%s = %s %s %s\n",temp,st[top-3],st[top-2],st[top-1]);
-	top-=2;
-	strcpy(st[top-1],temp);
-	if(i_[1]!='9')
-		i_[1]++;
-	else
-	{
-		i_[1] = '0';
-		i_[0]++;
-	}
-}
-
-
-void codegen()
-{
-	strcpy(temp,"t");
-	strcat(temp,i_);
-	printf("%s = %s %s %s\n",temp,st[top-3],st[top-1],st[top-2]);
+	Q[quadindex].op = (char*)malloc(sizeof(char)*strlen(st[top-2]));
+	    Q[quadindex].arg1 = (char*)malloc(sizeof(char)*strlen(st[top-3]));
+	    Q[quadindex].arg2 = (char*)malloc(sizeof(char)*strlen(st[top - 1]));
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*strlen(temp));
+	    strcpy(Q[quadindex].op,st[top-2]);
+	    strcpy(Q[quadindex].arg1,st[top-3]);
+	    strcpy(Q[quadindex].arg2,st[top - 1]);
+	    strcpy(Q[quadindex].res,temp);
+	    quadindex++;
 	top-=2;
 	strcpy(st[top-1],temp);
 	if(i_[1]!='9')
@@ -340,40 +326,81 @@ void codegen_syns(){
 }
 
 void codegen_assign(){
-  printf("%s = %s\n", st[top-1], st[top-2]);
+  printf("%s = %s\n", st[top-1],st[top-2]);
+Q[quadindex].op = (char*)malloc(sizeof(char));
+	    Q[quadindex].arg1 = (char*)malloc(sizeof(char)*strlen(st[top - 2]));
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*strlen(st[top-1]));
+	    strcpy(Q[quadindex].op,"=");
+	    strcpy(Q[quadindex].arg1,st[top - 2]);
+	    strcpy(Q[quadindex].res,st[top-1]);
+	    quadindex++;
   top = top - 2;
 }
+
 
 void codegen_while1(){
 
   label[ltop++] = ++lnum;
-  printf("L%d :", label[ltop - 1]);
-
+  printf("L%d :\n", label[ltop - 1]);
+  
   label[ltop++] = ++lnum;
+Q[quadindex].op = (char*)malloc(sizeof(char)*6);		//a label's quad 	
+	    Q[quadindex].arg1 = NULL;
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum + 2));   //lum + 2 is a safe way to have enough space for L0, L1, ... etc. 
+	    strcpy(Q[quadindex].op,"Label");
+	    char x[10];
+		x[0] = '0' + label[ltop - 2];
+	    char l[]="L";
+	    strcpy(Q[quadindex].res,strcat(l,x));
+	    quadindex++;
 //   printf("%d %d\n", label[ltop - 1], label[ltop - 2]);
 }
 
-void codegen_while2(){
-      strcpy(temp,"t");
-	strcat(temp,i_);
-
-	printf("%s = not %s\n",temp,st[top - 1]);
-	printf("if %s goto L%d\n",temp,label[ltop-1]);
-	if(i_[1]!='9')
-		i_[1]++;
-	else
-	{
-		i_[1] = '0';
-		i_[0]++;
-	}
-      // printf("%d %d\n", label[ltop - 1], label[ltop - 2]);
-
+void codegen_while2()
+{
+  strcpy(temp,"t");
+ strcat(temp,i_);
+ printf("%s = not %s\n",temp,st[top - 1]);
+Q[quadindex].op = (char*)malloc(sizeof(char)*4);
+	    Q[quadindex].arg1 = (char*)malloc(sizeof(char)*strlen(st[top-1]));
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*strlen(temp));
+	    strcpy(Q[quadindex].op,"not");
+	    strcpy(Q[quadindex].arg1,st[top-1]);
+	    strcpy(Q[quadindex].res,temp);
+	    quadindex++;
+ printf("if %s goto L%d\n",temp,lnum);
+Q[quadindex].op = (char*)malloc(sizeof(char)*3);
+	    Q[quadindex].arg1 = (char*)malloc(sizeof(char)*strlen(temp));
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum+2));
+	    strcpy(Q[quadindex].op,"if");
+	    strcpy(Q[quadindex].arg1,temp);
+	    char x[10];
+	    sprintf(x,"%d",lnum);
+	    char l[]="L";
+	    strcpy(Q[quadindex].res,strcat(l,x));
+	    quadindex++;
+ i_[0]++;
+ label[++ltop]=lnum;
 }
+
+
 void codegen_while3(){
       strcpy(temp,"t");
 	strcat(temp,i_);
-	printf("goto L%d\n",label[ltop - 2]);
-	printf("L%d:\n",label[ltop - 1]);
+	Q[quadindex].op = (char*)malloc(sizeof(char)*6);		//a label's quad 	
+	    Q[quadindex].arg1 = NULL;
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum + 2));   //lum + 2 is a safe way to have enough space for L0, L1, ... etc. 
+	    strcpy(Q[quadindex].op,"goto");
+	    char x[10];
+		x[0] = '0' + label[ltop-3];
+	    char l[]="L";
+	    strcpy(Q[quadindex].res,strcat(l,x));
+	    quadindex++;
       ltop = ltop - 2;
 	if(i_[1]!='9')
 		i_[1]++;
@@ -382,7 +409,19 @@ void codegen_while3(){
 		i_[1] = '0';
 		i_[0]++;
 	}
-      // printf("%d %d\n", label[ltop - 1], label[ltop - 2]);
+
+	printf("goto L%d\n",label[ltop - 1]);
+	printf("L%d :\n",label[ltop ]);
+	Q[quadindex].op = (char*)malloc(sizeof(char)*6);		//a label's quad 	
+	    Q[quadindex].arg1 = NULL;
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum + 2));   //lum + 2 is a safe way to have enough space for L0, L1, ... etc. 
+	    strcpy(Q[quadindex].op,"Label");
+	    char y[10];
+		y[0] = '0' + label[ltop];
+	    char m[]="L";
+	    strcpy(Q[quadindex].res,strcat(m,y));
+	    quadindex++;
 }
 
 void lab1()
@@ -391,44 +430,48 @@ void lab1()
  strcpy(temp,"t");
  strcat(temp,i_);
  printf("%s = not %s\n",temp,st[top - 1]);
+Q[quadindex].op = (char*)malloc(sizeof(char)*4);
+	    Q[quadindex].arg1 = (char*)malloc(sizeof(char)*strlen(st[top-1]));
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*strlen(temp));
+	    strcpy(Q[quadindex].op,"not");
+	    strcpy(Q[quadindex].arg1,st[top-1]);
+	    strcpy(Q[quadindex].res,temp);
+	    quadindex++;
  printf("if %s goto L%d\n",temp,lnum);
+Q[quadindex].op = (char*)malloc(sizeof(char)*3);
+	    Q[quadindex].arg1 = (char*)malloc(sizeof(char)*strlen(temp));
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum+2));
+	    strcpy(Q[quadindex].op,"if");
+	    strcpy(Q[quadindex].arg1,temp);
+	    char x[10];
+	    sprintf(x,"%d",lnum);
+	    char l[]="L";
+	    strcpy(Q[quadindex].res,strcat(l,x));
+	    quadindex++;
  i_[0]++;
  label[++ltop]=lnum;
+ 
 }
-
 void lab2()
 {
 int x;
 lnum++;
 x=label[ltop--];
-printf("goto L%d\n",lnum);
-printf("L%d: \n",x);
-label[++ltop]=lnum;
-}
-
-void lab3()
-{
-int y;
-y=label[ltop--];
-printf("L%d: \n",y);
-}
-
-void lab1_for()
-{
-      label[ltop++] = ++lnum;
-      printf("L%d : \n",label[ltop - 1]);
-      label[ltop++] = ++lnum;
-      label[ltop++] = ++lnum;
-      label[ltop++] = ++lnum;
-}
-
-void lab2_for(int s)
-{
-	strcpy(temp,"t");
+strcpy(temp,"t");
 	strcat(temp,i_);
-	if(s!=0)
-		printf("%s = not %s\n",temp,st[top -1]);
-	printf("if %s goto L%d\n",temp,label[ltop - 1]);
+	Q[quadindex].op = (char*)malloc(sizeof(char)*6);		//a label's quad 	
+	    Q[quadindex].arg1 = NULL;
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum + 2));   //lum + 2 is a safe way to have enough space for L0, L1, ... etc. 
+	    strcpy(Q[quadindex].op,"goto");
+	    char p[10];
+		p[0] = '0' + lnum;
+	    char l[]="L";
+	    strcpy(Q[quadindex].res,strcat(l,p));
+	    quadindex++;
+      ltop = ltop - 2;
 	if(i_[1]!='9')
 		i_[1]++;
 	else
@@ -436,29 +479,91 @@ void lab2_for(int s)
 		i_[1] = '0';
 		i_[0]++;
 	}
-	printf("goto L%d\n", label[ltop - 3]);
-  printf("L%d :\n", label[ltop - 2]);
-
+printf("goto L%d\n",lnum);
+printf("L%d : \n",x);
+Q[quadindex].op = (char*)malloc(sizeof(char)*6);		//a label's quad 	
+	    Q[quadindex].arg1 = NULL;
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(lnum + 2));   //lum + 2 is a safe way to have enough space for L0, L1, ... etc. 
+	    strcpy(Q[quadindex].op,"Label");
+	    char y[10];
+		y[0] = '0' + x;
+	    char m[]="L";
+	    strcpy(Q[quadindex].res,strcat(m,y));
+	    quadindex++;
+label[++ltop]=lnum;
 }
 
-void lab3_for()
+void lab3()
 {
-  printf("goto L%d\n", label[ltop - 4]);
-  printf("L%d :\n", label[ltop - 3]);
-}
-
-void lab4_for()
-{
-	printf("goto L%d \n",label[ltop - 2]);
-	printf("L%d : \n",label[ltop - 1]);
-      ltop = ltop - 4;
+int y;
+y=label[ltop--];
+printf("L%d : \n",y);
+Q[quadindex].op = (char*)malloc(sizeof(char)*6);
+	    Q[quadindex].arg1 = NULL;
+	    Q[quadindex].arg2 = NULL;
+	    Q[quadindex].res = (char*)malloc(sizeof(char)*(y+2));
+	    strcpy(Q[quadindex].op,"Label");
+	    char x[10];
+	    sprintf(x,"%d",y);
+	    char l[]="L";
+	    strcpy(Q[quadindex].res,strcat(l,x));
+	    quadindex++;
 }
 
 int main()
 {
 	yyparse();
+	
 	if(valid)
-  		printf("Parsing successful\n\n\n");
+  		
+	{
+		//printf("Parsing successful\n\n\n");
+		FILE *filePointer = fopen("icg_output.txt", "w") ;
+	if ( filePointer == NULL )
+    	{
+        	printf( "File failed to open." ) ;
+		return;
+    	}
+	printf("Quadruples\n");
+		for(int i=0;i<quadindex;i++)
+	{	
+	
+	if(Q[i].arg1 == NULL)
+	{
+		Q[i].arg1 = "NULL";
+	}
+	if(Q[i].arg2 == NULL)
+	{
+		Q[i].arg2 = "NULL";
+	}
+        printf("%-8s %-8s %-8s %-6s\n",Q[i].op,Q[i].arg1,Q[i].arg2,Q[i].res);
+	char str[100]= "";
+	snprintf(str,sizeof(str),"%s %s %s %s",Q[i].op,Q[i].arg1,Q[i].arg2,Q[i].res);
+	if ( strlen (  str  ) > 0 )
+        {
+              
+            // writing in the file using fputs()
+            fputs(str, filePointer) ;   
+            fputs("\n", filePointer) ;
+        }
+	
+    }
+//	printf("%s",LineBreaker);
+	fclose(filePointer) ;
+
+	/*char str[100]= "";
+	snprintf(str,sizeof(str),"%s %s %s %s",Q[i].op,Q[i].arg1,Q[i].arg2,Q[i].res);
+	if ( strlen (  str  ) > 0 )
+        {
+              
+            // writing in the file using fputs()
+            fputs(str, filePointer) ;   
+            fputs("\n", filePointer) ;
+        }
+	
+    }*/
+}	
 	else
 	{
   		printf("Parsing unsuccessful\n\n\n");

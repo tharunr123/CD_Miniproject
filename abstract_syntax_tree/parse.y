@@ -52,7 +52,7 @@ extern void decrScope();
 %}
 
 %define parse.error verbose
-%token ID NUM T_lt T_gt COMMA STRC TERMINATOR RETURN FLT T_lteq T_gteq T_neq T_eqeq T_pl S_min S_mul S_add S_div T_min T_mul T_div T_and T_or T_incr T_decr T_not T_eq WHILE DO INT CHAR FLOAT VOID H MAINTOK INCLUDE BREAK CONTINUE IF ELSE COUT STRING FOR OB CB OBR CBR ENDL
+%token ID NUM T_lt T_gt COMMA STRC TERMINATOR RETURN FLT T_lteq T_gteq T_neq T_eqeq T_pl S_min S_mul S_add S_div T_min T_mul T_div T_and T_or T_incr T_decr T_not T_eq WHILE DO INT CHAR FLOAT VOID H MAINTOK INCLUDE BREAK CONTINUE IF ELSE COUT STRING OB CB OBR CBR ENDL
 
 
 %%
@@ -94,7 +94,7 @@ C
         $$ = addToTree("", $1, $2, NULL, 0);
         printTree($2);
         printf("\n");
-        printf("-----------------sss-----------------------------------------------\n");
+        printf("------------------------------------------------------------------\n");
       }
       | C LOOPS{
         $$ = addToTree("", $1, $2, NULL, 0);
@@ -106,7 +106,7 @@ C
         $$ = addToTree("", $1, NULL, NULL, 0);
         printTree($1);
         printf("\n");
-        printf("--------------dfgh--------------------------------------------------\n");
+        printf("--------------------------------------------------------------------\n");
       }
       | LOOPS{
         $$ = addToTree("", $1, NULL, NULL, 0);
@@ -128,15 +128,7 @@ LOOPS
         $$ = addToTree("do-while", $2, $5, NULL, 0);
 	
       }
-      | FOR OB ASSIGN_EXPR TERMINATOR COND TERMINATOR statement CB LOOPBODY{
-        astnode** siblings = (astnode**) malloc(sizeof(astnode*) * 2);
-        
-        siblings[0] = $7;
-        siblings[1] = $3;
-        // siblings[2] = statement;
-        
-        $$ = addToTree("for", $5, $9, siblings, 2);
-      }
+      
       | IF OB COND CB LOOPBODY {
          $$ = addToTree("if", $3, $5, NULL, 0);
       }

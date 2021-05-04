@@ -6,6 +6,7 @@ int main()
 	if(a>10)
 	{
 		cout<<"helo"<<endl;
+		int b;
 	}
 	else
 	{
@@ -21,6 +22,7 @@ int main()
 	int w=10;
 	float x;
 	a=12;
+	b=a+w;
 	
 	return 0;
 	

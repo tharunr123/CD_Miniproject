@@ -62,14 +62,10 @@ float {printf("%d\t%s\tTYPE\n", yylineno, yytext); dflag = 1; yylval = strdup(yy
 char {printf("%d\t%s\tTYPE\n", yylineno, yytext); dflag = 1; yylval = strdup(yytext); return CHAR;}
 "main()" {printf("%d\t%s\tKEYW\n", yylineno, yytext); dflag = 0; return MAINTOK;}
 do {printf("%d\t%s\tKEYW\n", yylineno, yytext); flag = 1; t_scope++; incrScope(); return DO; t_scope--; decrScope(t_scope);}
-for {printf("%d\t%s\tKEYW\n", yylineno, yytext); flag = 1; t_scope++; incrScope(); return FOR;}
 while {printf("%d\t%s\tKEYW\n", yylineno, yytext); flag = 1; t_scope++; incrScope(); return WHILE;}
-
 return {printf("%d\t%s\tKEYW\n", yylineno, yytext); return RETURN;}
 if {printf("%d\t%s\tKEYW\n", yylineno, yytext); return IF;}
 else {printf("%d\t%s\tKEYW\n", yylineno, yytext); return ELSE;}
-
-
 cout {printf("%d\t%s\tKEYW\n", yylineno, yytext);yylval = strdup(yytext); return COUT;}
 endl {printf("%d\t%s\tKEYW\n", yylineno, yytext); return ENDL;}
 break {printf("%d\t%s\tKEYW\n", yylineno, yytext); return BREAK;}
