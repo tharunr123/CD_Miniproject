@@ -15,3 +15,5 @@ Built a C++ compiler in C language as a part of a 4 credit course on Compiler De
 `chmod 777 start.sh`
 
 `./start.sh`
+
+*Developed and maintained by FourStripes Inc.*
